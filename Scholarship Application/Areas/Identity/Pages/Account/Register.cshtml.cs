@@ -134,7 +134,7 @@ namespace Scholarship_Application.Areas.Identity.Pages.Account
 
                 string extinsion = file.ContentType.Split("/")[1];
 
-                Guid guid = new Guid();
+                System.Guid guid = System.Guid.NewGuid();
 
                 string FileName = $"{guid}.{extinsion}";
 
@@ -152,7 +152,7 @@ namespace Scholarship_Application.Areas.Identity.Pages.Account
             
 
 
-                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, FirstName = Input.FirstName, LastName= Input.LastName , BirthDate = Input.BirthDate , GPA = Input.GPA , Major = Input.Major , University = Input.University, NationalID = Input.NationalID ,Resume =Input.Resume };
+                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, FirstName = Input.FirstName, LastName= Input.LastName , BirthDate = Input.BirthDate , GPA = Input.GPA , Major = Input.Major , University = Input.University, NationalID = Input.NationalID ,Resume =Input.Resume ,EmailConfirmed = true };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
@@ -160,8 +160,9 @@ namespace Scholarship_Application.Areas.Identity.Pages.Account
 
                       await _signInManager.SignInAsync(user, isPersistent: false);
                       await _userManager.AddToRoleAsync(user, "Student");
-                      return RedirectToRoute ($"student/edit/{user.Id}");
-                    
+                    return LocalRedirect($"~/Student/Edit/{user.Id}");
+
+
                 }
                 foreach (var error in result.Errors)
                 {

@@ -5,7 +5,7 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    var id = UserManager.GetUserAsync(User).Result.Id; 
+    var id = UserManager.GetUserAsync(User)?.Result?.Id; 
     <li class="nav-item">
         <a  class="nav-link text-dark" href="/Student/Edit/@id" title="Manage">Hello @User.Identity.Name!</a>
     </li>

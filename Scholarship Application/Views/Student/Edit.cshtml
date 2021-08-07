@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit"  enctype="multipart/form-data" asp-cv="@Model.Resume">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
 
@@ -66,14 +66,14 @@
                    asp-route-filename="@Model.Resume"
                    asp-route-name="@Model.FirstName @Model.LastName">
 
-                   Review @Model.FirstName @Model.LastName CV 
+                    Review @Model.FirstName @Model.LastName CV
 
                 </a>
             </div>
 
 
 
-           
+
 
             <div class="form-group">
                 <label for="name">Edit Your Cv</label>

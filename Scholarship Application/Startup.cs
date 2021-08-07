@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Scholarship_Application.Data;
+using Scholarship_Application.Helper;
 using Scholarship_Application.Models;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace Scholarship_Application
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env , ApplicationDbContext dB,SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             if (env.IsDevelopment())
             {
@@ -78,6 +79,9 @@ namespace Scholarship_Application
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+            dB.Database.Migrate();
+            IntializerData.Initialize(dB, signInManager, userManager, roleManager).Wait();
         }
     }
 }

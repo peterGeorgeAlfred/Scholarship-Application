@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Scholarship_Application.Models;
 using System;
@@ -35,11 +36,42 @@ namespace Scholarship_Application.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(ApplicationUser user)
+        public async Task<IActionResult> Edit(ApplicationUser user , IFormFile file)
         {
             var userResult = await userManager.FindByIdAsync(user.Id);
-            userResult.Status = user.Status;
+            userResult.FirstName = user.FirstName; 
+            userResult.LastName = user.LastName;
+            userResult.BirthDate = user.BirthDate;
+            userResult.NationalID = user.NationalID;
+            userResult.University = user.University;
+            userResult.Major = user.Major;
+            userResult.GPA = user.GPA;
+          
+
+
             var result = await userManager.UpdateAsync(userResult);
+
+
+            if (  !(file == null || file.Length == 0) )
+            {
+                string extinsion = file.ContentType.Split("/")[1];
+
+
+
+                string FileName = $"{userResult.Resume}";
+
+
+                var path = Path.Combine(
+                            Directory.GetCurrentDirectory(), "wwwroot/Resume", FileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+            }
+              
+           
+
 
             return RedirectToAction("UpdateSuccess");
 
@@ -107,6 +139,29 @@ namespace Scholarship_Application.Controllers
                 {".gif", "image/gif"},
                 {".csv", "text/csv"}
             };
+        }
+
+        public async Task UploadFile(IFormFile file , string cv)
+        {
+            if (file == null || file.Length == 0)
+                return ;
+
+            string extinsion = file.ContentType.Split("/")[1];
+
+            
+
+            string FileName = $"{cv}";          
+
+
+            var path = Path.Combine(
+                        Directory.GetCurrentDirectory(), "wwwroot/Resume", FileName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+           
         }
     }
 }

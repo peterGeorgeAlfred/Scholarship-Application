@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace Scholarship_Application.Controllers
 {
+    [Authorize(Roles ="Admin")]
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -28,7 +30,7 @@ namespace Scholarship_Application.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await userManager.Users.ToListAsync());
+            return View(await userManager.Users.Where(i=>i.Email!= "pgalfred2014@hotmail.com").ToListAsync());
         }
 
         #endregion
