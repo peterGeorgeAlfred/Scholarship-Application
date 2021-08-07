@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Scholarship_Application.Controllers
 {
-    [Authorize(Roles ="Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -30,7 +30,7 @@ namespace Scholarship_Application.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await userManager.Users.Where(i=>i.Email!= "pgalfred2014@hotmail.com").ToListAsync());
+            return View(await userManager.Users.Where(i => i.Email != "pgalfred2014@hotmail.com").ToListAsync());
         }
 
         #endregion
@@ -43,8 +43,8 @@ namespace Scholarship_Application.Controllers
                 return NotFound();
             }
 
-            var user =await userManager.FindByIdAsync(id);
-           
+            var user = await userManager.FindByIdAsync(id);
+
             if (user == null)
             {
                 return NotFound();
@@ -57,12 +57,12 @@ namespace Scholarship_Application.Controllers
         {
             var userResult = await userManager.FindByIdAsync(user.Id);
             userResult.Status = user.Status;
-            var result = await userManager.UpdateAsync(userResult); 
+            var result = await userManager.UpdateAsync(userResult);
 
 
-           await sendEmailFn(userResult);
-           
-            
+            await sendEmailFn(userResult);
+
+
             return RedirectToAction("Index");
         }
 
@@ -101,7 +101,7 @@ namespace Scholarship_Application.Controllers
                 }
 
 
-             
+
 
             }
 
@@ -153,16 +153,24 @@ namespace Scholarship_Application.Controllers
         public IActionResult Export()
         {
             DataTable dt = new DataTable("Grid");
-            dt.Columns.AddRange(new DataColumn[4] { new DataColumn("Email"),
+            dt.Columns.AddRange(new DataColumn[8] {
+
+                                        new DataColumn("Email"),
                                         new DataColumn("FirstName"),
                                         new DataColumn("LastName"),
-                                        new DataColumn("NationalID") });
+                                        new DataColumn("Date of Birth"),
+                                        new DataColumn("NationalID"),
+                                        new DataColumn("Universaity"),
+                                        new DataColumn("Major"),
+                                        new DataColumn("GPA"),
+                                     
+            });
 
-            var students = userManager.Users.ToList();
+            var students = userManager.Users.Where(i => i.Email != "pgalfred2014@hotmail.com").ToList();
 
             foreach (var student in students)
             {
-                dt.Rows.Add(student.Email, student.FirstName, student.LastName, student.NationalID);
+                dt.Rows.Add(student.Email, student.FirstName, student.LastName,student.BirthDate, student.NationalID,student.University,student.Major,student.GPA);
             }
 
             using (XLWorkbook wb = new XLWorkbook())
