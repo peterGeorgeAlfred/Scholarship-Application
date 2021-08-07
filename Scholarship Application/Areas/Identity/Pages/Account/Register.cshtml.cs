@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -111,7 +113,7 @@ namespace Scholarship_Application.Areas.Identity.Pages.Account
             public string GPA { get; set; } 
             #endregion
 
-            //public string Resume { get; set; }
+            public string Resume { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -120,13 +122,37 @@ namespace Scholarship_Application.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(IFormFile file ,string returnUrl = null )
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, FirstName = Input.FirstName, LastName= Input.LastName , BirthDate = Input.BirthDate , GPA = Input.GPA , Major = Input.Major , University = Input.University, NationalID = Input.NationalID  };
+
+                if (file == null || file.Length == 0)
+                    return Content("file not selected");
+
+                string extinsion = file.ContentType.Split("/")[1];
+
+                Guid guid = new Guid();
+
+                string FileName = $"{guid}.{extinsion}";
+
+                Input.Resume = FileName;
+
+
+                var path = Path.Combine(
+                            Directory.GetCurrentDirectory(), "wwwroot/Resume", FileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+            
+
+
+                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, FirstName = Input.FirstName, LastName= Input.LastName , BirthDate = Input.BirthDate , GPA = Input.GPA , Major = Input.Major , University = Input.University, NationalID = Input.NationalID ,Resume =Input.Resume };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
@@ -134,7 +160,7 @@ namespace Scholarship_Application.Areas.Identity.Pages.Account
 
                       await _signInManager.SignInAsync(user, isPersistent: false);
                       await _userManager.AddToRoleAsync(user, "Student");
-                      return LocalRedirect(returnUrl);
+                      return RedirectToRoute ($"student/edit/{user.Id}");
                     
                 }
                 foreach (var error in result.Errors)
@@ -146,5 +172,32 @@ namespace Scholarship_Application.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
+
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return Content("file not selected");
+
+            string extinsion = file.ContentType.Split("/")[1];       
+
+            Guid guid = new Guid();
+
+            string FileName = $"{guid}.{extinsion}";
+
+            Input.Resume = FileName; 
+            
+
+            var path = Path.Combine(
+                        Directory.GetCurrentDirectory(), "wwwroot/Resume", FileName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return RedirectToAction("Files");
+        }
+
     }
 }
